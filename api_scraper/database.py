@@ -2,6 +2,7 @@ import sqlite3
 import os
 import datetime
 from collections import namedtuple
+from pprint import pprint
 
 import argparse
 
@@ -91,6 +92,9 @@ def insert_day_prices(stock_name: str, day: datetime.date,
             VALUES ('{stock_name}', '{day}', {open_price}, {close_price}, {low}, {high}, {volume});
         """)
         connection.commit()
+        print("-"*50)
+        print(f"Inserted: {stock_name:<6} ({day}, {open_price:>7}, {close_price:>7}, {volume:>7}, {low:>7}, {high:>7})")
+        print("-"*50)
     except sqlite3.IntegrityError as e:
         print(f"IntegrityError: {e}")
     except sqlite3.Error as e:
@@ -129,6 +133,9 @@ def view_database():
             connection.close()
             
 def get_stock_data(stock_name: str):
+    """
+    Given a stock symbol, returns the stock's historical data per day
+    """
     try:
         connection, cursor = connect_to_db()
         
@@ -146,6 +153,30 @@ def get_stock_data(stock_name: str):
         print(f"SQLite error: {e}")
     finally:
         connection.close()
+        
+def get_data_size():
+    """
+    Returns the amount of entries per stock symbol
+    """
+    try:
+        connection, cursor = connect_to_db()
+        
+        cursor.execute("""
+            SELECT stockName, COUNT(*)
+            FROM Day
+            GROUP BY stockName;
+        """)
+        results = cursor.fetchall()
+        return results
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+    finally:
+        connection.close()
+        
+def view_data_size():
+    results = get_data_size()
+    pprint(results)
+    return
     
             
 def clear_database():
@@ -171,15 +202,17 @@ def connect_to_db() -> tuple[sqlite3.Connection, sqlite3.Cursor]:
 def main():
     argparser = argparse.ArgumentParser("Database.py")
     argparser.add_argument("-c", "--clear", action="store_true")
-    argparser.add_argument("-v", "--view", action="store_true")
+    argparser.add_argument("-p", "--print", action="store_true")
+    argparser.add_argument("-l", "--length", action="store_true")
     
     args = argparser.parse_args()
     
     if args.clear:
         clear_database()
-    
-    if args.view:
+    if args.print:
         view_database()
+    if args.length:
+        view_data_size()
     
     
 if __name__ == '__main__':

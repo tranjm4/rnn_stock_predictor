@@ -6,7 +6,7 @@ import csv
 
 import database
 
-START_DATE = datetime.date(2022,7,12)
+START_DATE = datetime.date(2022,7,14)
 END_DATE = datetime.date(2024,7,12)
 
 NON_TRADING_HOLIDAYS = [
@@ -46,13 +46,10 @@ BASE_URL = "https://api.polygon.io/v2/aggs"
 
 
 def main():
-    symbols_path = os.path.dirname(__file__) + "/request_urls.csv"
+    symbols_path = os.path.dirname(__file__) + "/ticker_symbols.csv"
     with open(symbols_path, "r") as csvfile:
         csv_reader = csv.reader(csvfile)
-        
         get_symbol_data(csv_reader)
-        
-        database.view_database()
         
 
 def get_symbol_data(csv_reader) -> None:
@@ -64,6 +61,12 @@ def get_symbol_data(csv_reader) -> None:
     """
     for line in csv_reader:
         symbol = line[0]
+        
+        # If the stock already exists in the database, skip it
+        if database.is_stock_in_db(symbol):
+            print(f"Skipping {symbol} because it already exists")
+            continue
+        
         database.insert_stock_name(symbol)
         
         data = fetch_data(symbol)

@@ -176,7 +176,26 @@ def get_data_size():
 def view_data_size():
     results = get_data_size()
     pprint(results)
-    return
+
+def is_stock_in_db(stock_name: str) -> bool:
+    """
+    Given a stock symbol, returns whether or not it already exists in the database.
+    """
+    try:
+        connection, cursor = connect_to_db()
+        
+        cursor.execute(f"""
+            SELECT * FROM Stock
+            WHERE name = '{stock_name}';
+        """)
+        
+        result = cursor.fetchall()
+        return bool(result)         # Returns false if empty result (empty list)
+    
+    except sqlite3.Error as e:
+        print(f"SQLite erro: {e}")
+    finally:
+        connection.close()
     
             
 def clear_database():

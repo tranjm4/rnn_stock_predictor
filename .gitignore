@@ -1,2 +1,5 @@
 
 .env
+api_scraper/stock_database.db
+**/__pycache__/
+tests/__pycache__/

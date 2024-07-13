@@ -6,8 +6,8 @@ import csv
 
 import database
 
-START_DATE = datetime.date(2022,1,1)
-END_DATE = datetime.date(2022,7,11)
+START_DATE = datetime.date(2022,7,12)
+END_DATE = datetime.date(2024,7,12)
 
 NON_TRADING_HOLIDAYS = [
     datetime.date(2024,1,1),    # New Year's Day
@@ -148,4 +148,4 @@ def _get_stock_price_details(entry: dict) \
 
 
 if __name__ == '__main__':
-    print(API_KEY)
+    main()

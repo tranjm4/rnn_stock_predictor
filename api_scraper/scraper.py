@@ -6,7 +6,7 @@ import csv
 
 import database
 
-START_DATE = datetime.date(2022,7,14)
+START_DATE = datetime.date(2022,8,1)
 END_DATE = datetime.date(2024,7,12)
 
 NON_TRADING_HOLIDAYS = [

@@ -7,8 +7,8 @@ from pprint import pprint
 import argparse
 
 DATABASE_PATH = os.path.dirname(__file__) + "/stock_database.db"
-StockData = namedtuple("Day",
-                 ("date", "open_price", "close_price", "pre_market", "after_hours", "volume"))
+StockData = namedtuple("StockData",
+                 ("open_price", "close_price", "low", "high", "volume"))
 
 def create_db_file():
     """
@@ -140,7 +140,7 @@ def get_stock_data(stock_name: str):
         connection, cursor = connect_to_db()
         
         cursor.execute(f"""
-            SELECT day, open, close, low, high, volume
+            SELECT open, close, low, high, volume
             FROM Day
             WHERE stockName = '{stock_name}'
         """)
@@ -149,6 +149,22 @@ def get_stock_data(stock_name: str):
         # Returns a StockData namedtuple with fields:
         # {date, open, close, pre_market, after_hours, volume}
         return StockData(*zip(*results))
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+    finally:
+        connection.close()
+        
+def get_all_symbols():
+    """
+    Returns all unique symbols in the database
+    """
+    try:
+        connection, cursor = connect_to_db()
+        cursor.execute("""
+            SELECT * FROM Stock;
+        """)
+        result = cursor.fetchall()
+        return [x[0] for x in result]
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
     finally:

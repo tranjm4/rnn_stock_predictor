@@ -64,3 +64,4 @@ Some future tasks I have in mind include:
 - training alternative LSTM architectures (e.g., additional layers for complexity, fewer layers for compactness)
 - predicting beyond next-day prices
 - training a model that predicts when to buy and sell
+

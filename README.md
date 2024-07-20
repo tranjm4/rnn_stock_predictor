@@ -34,23 +34,21 @@ Given a 14-day history of a stock's OHLCV data, the model was trained to predict
 
 Because the model was trained on values within the interval (0,1), to evaluate the model on unseen data, the outside data had to be scaled to (0,1). The model's output was compared to the scaled value of the 14th day to get a percentage change, with which we multiply to the 14th day's unscaled closing price. This gets us an unscaled predicted closing price for the 15th day using the model.
 
-Across all models trained, the model performed particularly well. Some particular behaviors include:
-
-- underpredicting or overpredicting small subsections of the data
-  - a special obsevation was the 30-day model underpredicting the majority of $T
-- being able to follow gap-like behavior (when prices take a sharp jump)
-- the 30-day model performed slightly worse than the 14-day models
-  - using a Huber loss may allow for weights of insignificant n-day dependencies to collapse to zero
-
 ***
 
 ## 2. Lessons Learned
 
-Having limited prior experience in machine learning processes (data collection/reshaping, model training), I found it a fun challenge to get involved with a complex problem such as this!
+WORK IN PROGRESS!
 
-I could have pulled one of the many Kaggle datasets on historical stock data, but I wanted to familiarize myself with database design and interface design. By asking myself frequent questions about the potential design of my data, I was able to end with a design that I was happy with and that I was able to easily interface with during the model training process.
+### 7/20/2024
 
-During model training, my largest roadblock was shaping the data in an appropriate format for the LSTM architecture. My PyTorch abilities were subpar starting out, but I felt I was able to better understand how to use it to my advantage to morph the data to eventually train the model.
+Having developed preliminary models based on solely OHLCV features, I found that it was ineffective at predicting next-day prices. Given the general trend of stocks increasing, the data was biased towards increases in prices. Therefore, the model was consistently predicting increases in next-day prices.
+
+Moreover, it was often making conservative predictions as a result of minimizing its loss and its ability to predict strengths in next-day price movements.
+
+Having moved towards including derived features such as EMA, MACD, and RSI, I found it an interesting challenge to make decisions on how to normalize and rescale the data. Because of the time series structure of the data, I learned that it is important to preserve local relationships while also preserving larger-scale patterns in the data.
+
+What I am proudest of is the normalization of the MACD data. The values were often heavily skewed, but I derived a localized Z-score normalization that allowed the data to be more identically distributed :)
 
 ***
 

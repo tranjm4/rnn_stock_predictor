@@ -14,7 +14,11 @@ These models utilize a stock's trailing n days of data (open, high, low, close, 
 
 ### 1.1 Data Collection
 
-The data used was obtained by manually querying [Polygon's Stock API](https://polygon.io/docs/stocks) and storing that data into `api_scraper/stock_database.db`. The database design and its API is specified in `api_scraper/database.py`.
+The data used was obtained by manually querying [Polygon's Stock API](https://polygon.io/docs/stocks) and storing that data into `api_scraper/stock_database.db`. The database design and its API is specified in `api_scraper/database.py`. The past 2 years of stock histories was collected.
+
+#### 7/20/2024 Update
+
+The data is now obtained from the `yfinance` library, which allows for unbounded stock history data. Data has been expanded from 2 years to up to 10 years of stock history data.
 
 `api_scraper/scraper.py` performed this task by iterating through `api_scraper/ticker_symbols.csv`.
 
@@ -50,6 +54,8 @@ Having moved towards including derived features such as EMA, MACD, and RSI, I fo
 
 What I am proudest of is the normalization of the MACD data. The values were often heavily skewed, but I derived a localized Z-score normalization that allowed the data to be more identically distributed :)
 
+I'm still in the process of figuring out how to best normalize the other features!
+
 ***
 
 ## 3. Future Works
@@ -57,8 +63,8 @@ What I am proudest of is the normalization of the MACD data. The values were oft
 Some future tasks I have in mind include:
 
 - incorporating additional derived features such as:
-  - Exponential Moving Averages (EMA)
-  - Moving Average Convergence Divergence (MACD)
+  - Exponential Moving Averages (EMA) (DONE)
+  - Moving Average Convergence Divergence (MACD) (DONE)
 - training alternative LSTM architectures (e.g., additional layers for complexity, fewer layers for compactness)
 - predicting beyond next-day prices
 - training a model that predicts when to buy and sell

@@ -40,10 +40,10 @@ def create_database():
             CREATE TABLE Day (
                 stockName VARCHAR(5),
                 day DATE,
-                open DECIMAL(6,2),
-                close DECIMAL(6,2),
-                low DECIMAL(6,2),
-                high DECIMAL(6,2),
+                open DECIMAL(16,10),
+                close DECIMAL(16,10),
+                low DECIMAL(16,10),
+                high DECIMAL(16,10),
                 volume INTEGER,
                 
                 PRIMARY KEY (stockName, day),
@@ -80,11 +80,6 @@ def insert_day_prices(stock_name: str, day: datetime.date,
     """
     try:
         connection, cursor = connect_to_db()
-        
-        open_price = round(open_price, 2)
-        close_price = round(close_price, 2)
-        low = round(low, 2)
-        high = round(high, 2)
         
         cursor.execute(f"""
             INSERT INTO Day
@@ -132,27 +127,44 @@ def view_database():
         if connection:
             connection.close()
             
-def get_stock_data(stock_name: str):
+def get_stock_data(stock_name: str, fields: tuple[str],
+                   start_date: datetime.date = None, 
+                   end_date: datetime.date = None):
     """
     Given a stock symbol, returns the stock's historical data per day
+    optional parameters include a start and/or end date to filter results.
+    If neither are given, returns the full history
     """
+    if start_date == None and end_date == None:
+        condition = ""
+    elif start_date != None and end_date == None:
+        condition = f" AND day >= '{start_date}'"
+    elif start_date == None and end_date != None:
+        condition = f" AND day <= '{end_date}'"
+    else:
+        condition = f" AND day >= '{start_date}' AND day <= '{end_date}'"
     try:
         connection, cursor = connect_to_db()
         
         cursor.execute(f"""
-            SELECT open, close, low, high, volume
+            SELECT {','.join(fields)}
             FROM Day
             WHERE stockName = '{stock_name}'
+            {condition};
         """)
         results = cursor.fetchall()    
         
         # Returns a StockData namedtuple with fields:
         # {date, open, close, pre_market, after_hours, volume}
-        return StockData(*zip(*results))
+        if results == []:
+            return None
+        else:
+            return StockData(*zip(*results))
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
     finally:
         connection.close()
+
         
 def get_all_symbols():
     """
@@ -161,7 +173,7 @@ def get_all_symbols():
     try:
         connection, cursor = connect_to_db()
         cursor.execute("""
-            SELECT * FROM Stock;
+            SELECT stockName FROM Day GROUP BY stockName;
         """)
         result = cursor.fetchall()
         return [x[0] for x in result]

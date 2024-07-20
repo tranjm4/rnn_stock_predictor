@@ -4,6 +4,8 @@ import os
 import datetime
 import csv
 
+import yfinance as yf
+
 import database
 
 START_DATE = datetime.date(2022,8,1)
@@ -149,6 +151,30 @@ def _get_stock_price_details(entry: dict) \
     
     return open_price, close_price, low, high, volume
 
+def yfinance_store_data():
+    symbols_path = os.path.dirname(__file__) + "/ticker_symbols.csv"
+    with open(symbols_path, "r") as csvfile:
+        csv_reader = csv.reader(csvfile)
+        for symbol in csv_reader:
+            symbol = symbol[0]
+            print(f"Retrieving {symbol}...")
+            database.insert_stock_name(symbol)
+            ticker = yf.Ticker(symbol)
+            for entry in ticker.history(period="5d`").iterrows():
+                date = entry[0].to_pydatetime().date()
+                open_price = entry[1]["Open"]
+                close_price = entry[1]["Close"]
+                high = entry[1]["High"]
+                low = entry[1]["Low"]
+                volume = entry[1]["Volume"]
+                
+                database.insert_day_prices(symbol, date,
+                                           open_price, close_price,
+                                           volume, low, high)
+            
+            
+
 
 if __name__ == '__main__':
-    main()
+    # main()
+    yfinance_store_data()

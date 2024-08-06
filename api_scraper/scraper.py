@@ -156,22 +156,37 @@ def yfinance_store_data():
     with open(symbols_path, "r") as csvfile:
         csv_reader = csv.reader(csvfile)
         for symbol in csv_reader:
+            skip = False
             symbol = symbol[0]
             print(f"Retrieving {symbol}...")
             database.insert_stock_name(symbol)
             ticker = yf.Ticker(symbol)
-            for entry in ticker.history(period="5d`").iterrows():
+            history = ticker.history(period="10y")
+            
+            # If the stock hasn't existed for long, try 5 years instead
+            if (len(history) == 0):
+                history = ticker.history(period="5y")
+                
+            # Iterate through each daily entry
+            for entry in history.iterrows():
                 date = entry[0].to_pydatetime().date()
                 open_price = entry[1]["Open"]
                 close_price = entry[1]["Close"]
                 high = entry[1]["High"]
                 low = entry[1]["Low"]
                 volume = entry[1]["Volume"]
-                
-                database.insert_day_prices(symbol, date,
-                                           open_price, close_price,
-                                           volume, low, high)
-            
+                try:
+                    database.insert_day_prices(symbol, date,
+                                                open_price, close_price,
+                                                volume, low, high)
+                except database.sqlite3.IntegrityError:
+                    print(f"Data already retrieved for {symbol}. Skipping...")
+                    skip = True
+                    break
+            if skip:
+                continue
+            else:
+                time.sleep(5)
             
 
 

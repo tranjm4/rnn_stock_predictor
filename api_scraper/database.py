@@ -92,6 +92,7 @@ def insert_day_prices(stock_name: str, day: datetime.date,
         print("-"*50)
     except sqlite3.IntegrityError as e:
         print(f"IntegrityError: {e}")
+        raise e
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
     finally:
@@ -127,7 +128,7 @@ def view_database():
         if connection:
             connection.close()
             
-def get_stock_data(stock_name: str, fields: tuple[str],
+def get_stock_data(stock_name: str, fields: tuple[str]=["*"],
                    start_date: datetime.date = None, 
                    end_date: datetime.date = None):
     """
